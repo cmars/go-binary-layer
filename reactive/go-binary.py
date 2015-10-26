@@ -18,6 +18,8 @@ def install():
 
 @hook('upgrade-charm')
 def upgrade():
+    # TODO: get_state("go-binary.config")
+    #       and compare with upgraded, remove old service if name has changed.
     config = gobinary.config()
     service = config["binary"]
     need_restart = False
@@ -44,3 +46,4 @@ def install_workload(config):
             "ctx": config,
             "install_binary": install_binary,
         })
+    set_state('go-binary.config' % (config))
