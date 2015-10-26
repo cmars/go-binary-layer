@@ -1,0 +1,7 @@
+description "{{ctx.binary}} service"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+respawn
+
+exec {{install_binary}} {{ctx.args}}
