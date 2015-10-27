@@ -13,7 +13,7 @@ import gobinary
 def install():
     config = gobinary.config()
     install_workload(config)
-    set_state('%s.available' % (config['binary']))
+    set_state('gobinary.start')
 
 
 @hook('upgrade-charm')
