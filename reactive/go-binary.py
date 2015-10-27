@@ -5,7 +5,7 @@ import yaml
 
 from charmhelpers.core import hookenv, host
 from charmhelpers.core.templating import render
-from charms.reactive import hook, set_state
+from charms.reactive import hook, set_state, when, when_not, remove_state
 import gobinary
 
 
@@ -30,6 +30,22 @@ def upgrade():
     install_workload(config)
     if need_restart:
         host.service_start(service)
+
+
+@when('gobinary.start')
+@when_not('gobinary.started')
+def start_gobinary():
+    bin_config = gobinary.config()
+    host.service_start(bin_config['binary'])
+    set_state('gobinary.started')
+
+
+@when('gobinary.started')
+@when_not('gobinary.start')
+def stop_gobinary():
+    bin_config = gobinary.config()
+    host.service_stop(bin_config['binary'])
+    remove_state('gobinary.started')
 
 
 def install_workload(config):
