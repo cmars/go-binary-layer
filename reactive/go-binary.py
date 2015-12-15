@@ -13,7 +13,6 @@ import gobinary
 def install():
     config = gobinary.config()
     install_workload(config)
-    set_state('gobinary.start')
 
 
 @hook('upgrade-charm')
@@ -25,7 +24,6 @@ def upgrade():
     need_restart = False
     if host.service_running(service):
         need_restart = True
-    if need_restart:
         host.service_stop(service)
     install_workload(config)
     if need_restart:
@@ -33,19 +31,22 @@ def upgrade():
 
 
 @when('gobinary.start')
-@when_not('gobinary.started')
-def start_gobinary():
+def restart_gobinary():
+    remove_state('gobinary.start')
     bin_config = gobinary.config()
-    host.service_start(bin_config['binary'])
+    if host.service_running(bin_config['binary']):
+        host.service_restart(bin_config['binary'])
+    else:
+        host.service_start(bin_config['binary'])
     set_state('gobinary.started')
 
 
-@when('gobinary.started')
-@when_not('gobinary.start')
+@when('gobinary.stop')
 def stop_gobinary():
+    remove_state('gobinary.stop')
     bin_config = gobinary.config()
-    host.service_stop(bin_config['binary'])
-    remove_state('gobinary.started')
+    if host.service_running(bin_config['binary']):
+        host.service_stop(bin_config['binary'])
 
 
 def install_workload(config):
@@ -62,4 +63,4 @@ def install_workload(config):
             "ctx": config,
             "install_binary": install_binary,
         })
-    set_state('go-binary.config' % (config))
+    set_state('go-binary.available')
